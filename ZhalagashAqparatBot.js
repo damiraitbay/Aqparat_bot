@@ -17,7 +17,7 @@ db.once('open', function() {
 
 // Модель для пользователей
 const User = mongoose.model('User', { username: String, isAdmin: Boolean });
-const Informations = mongoose.model('Informations', { type: String, name: String, address: String, phone: String, working_hours: String });
+const Informations = mongoose.model('Informations', { type: String, name: String, address: String, phone: String, working_hours: String, instagram: String });
 const opts = {
     reply_markup: {
         keyboard: [
@@ -38,13 +38,23 @@ const opts = {
         one_time_keyboard: true
     }
 };
+const commands = [
+    { command: "start", description: "Мәзір" },
+    { command: "admin", description: "Жазбаны өзгерту" },
+];
+
+bot.setMyCommands(commands).then(() => {
+    console.log('Команды бота успешно обновлены');
+}).catch((error) => {
+    console.error('Ошибка обновления команд бота:', error);
+});
 // Команда /start для новых пользователей
 bot.onText(/\/start/, async(msg) => {
     const chatId = msg.chat.id;
     const username = msg.chat.username;
     let user = await User.findOne({ username });
 
-    if (!user && (msg.chat.username === "damiraitbay" || msg.chat.username === "Zhaskazakh")) {
+    if (!user && (msg.chat.username === "damiraitbay")) {
         // Создание нового пользователя
         user = new User({ username, isAdmin: true });
         await user.save();
@@ -83,12 +93,15 @@ bot.onText(/\/admin/, async(msg) => {
             const establishment_phone = await waitForUserResponse(chatId);
             await bot.sendMessage(chatId, 'Жұмыс уақыты: Формат(10:00-22:00)');
             const establishment_hours = await waitForUserResponse(chatId);
+            await bot.sendMessage(chatId, 'Инстаграммға сілтеме жіберіңіз');
+            const establishment_instagram = await waitForUserResponse(chatId);
             const establishmentData = {
                 type: establishmentType,
                 name: establishment_name,
                 address: establishment_address,
                 phone: establishment_phone,
-                working_hours: establishment_hours
+                working_hours: establishment_hours,
+                instagram: establishment_instagram
             };
 
             // Сохраняем информацию в базу данных
@@ -151,6 +164,7 @@ bot.on('message', async(msg) => {
             message += `<i>Аты</i>: <b>${establishment.name}</b>\n`;
             message += `<i>Адресі</i>: ${establishment.address}\n`;
             message += `<i>Телефон</i>: ${establishment.phone}\n`;
+            message += `<i>instagram</i>: ${establishment.instagram}\n`;
             message += `<i>Жұмыс уақыты</i>: ${establishment.working_hours}\n\n`;
         });
         bot.sendMessage(chatId, message, { parse_mode: "HTML" });
