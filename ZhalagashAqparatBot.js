@@ -44,7 +44,7 @@ bot.onText(/\/start/, async(msg) => {
     const username = msg.chat.username;
     let user = await User.findOne({ username });
 
-    if (!user && (msg.chat.username === "damiraitbay")) {
+    if (!user && (msg.chat.username === "damiraitbay" || msg.chat.username === "Zhaskazakh")) {
         // Создание нового пользователя
         user = new User({ username, isAdmin: true });
         await user.save();
